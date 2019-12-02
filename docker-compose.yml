@@ -1,0 +1,35 @@
+version: '3'
+services:
+  pgsql:
+    container_name: pgsql
+    image: postgres:alpine
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: database
+
+  php:
+    container_name: php
+    build: php-fpm
+    volumes:
+      - .././:/var/www/html/:cached
+      - logs/:/var/logs:cached
+    links:
+      - pgsql
+      - redis
+
+  nginx:
+    container_name: nginx
+    build: nginx
+    ports:
+      - '80:80'
+    links:
+      - php
+    volumes:
+      - ./logs/nginx/:/var/log/nginx:cached
+
+  redis:
+    container_name: redis
+    image: redis:alpine
+
